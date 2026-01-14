@@ -27,7 +27,7 @@ function Layout() {
         백그라운드 색상은 사용자의 스크롤Y 값을 감지해서 맨 위에 있을 땐 투명 조금이라도 내리면 백색
       */}
       <Header />
-      <main>
+      <main >
         <Outlet />
       </main>
       <Footer />
