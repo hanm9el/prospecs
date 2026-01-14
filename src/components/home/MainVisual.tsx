@@ -4,6 +4,7 @@ import img03 from "../../assets/images/home/mainVisual03.png";
 import img04 from "../../assets/images/home/mainVisual04.png";
 import img05 from "../../assets/images/home/mainVisual05.png";
 import img06 from "../../assets/images/home/mainVisual06.jpg";
+import img07 from "../../assets/images/home/mainVisual07.png";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import "swiper/css";
@@ -26,6 +27,7 @@ const SLIDES = [
   { id: 4, image: img04, title: "사패2", sub: "한국타이어 기술력을 담은 트레일 러닝화" },
   { id: 5, image: img05, title: "HYPER RUSH 2", sub: "지칠 때 더 가볍게, 탄력적인 카본 러닝화" },
   { id: 6, image: img06, title: "MARATHON 220", sub: "클래식이 만든 새로운 속도" },
+  { id: 7, image: img07, title: "IN FOCUS : WALKING SHOES", sub: "검증된 편안함과 안정성, 그리고 워킹의 정석이 되다" },
 ];
 
 function MainVisual() {
