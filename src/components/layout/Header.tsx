@@ -156,7 +156,7 @@ function Header() {
         </div>
 
         {/*  오른쪽 영역  */}
-        <div className={twMerge(["w-100", "flex", "justify-end", "items-center","gap-3"])}>
+        <div className={twMerge(["w-100", "flex", "justify-end", "items-center", "gap-3"])}>
           <div className={twMerge(["relative", "hidden", "md:block"])}>
             <input
               className={twMerge(
