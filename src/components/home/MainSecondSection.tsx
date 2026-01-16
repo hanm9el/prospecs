@@ -13,7 +13,7 @@ function MainSecondSection() {
 
 export default MainSecondSection;
 
-type CardProps = {
+type CardProps = {A
   image: string;
   title: string;
 };
