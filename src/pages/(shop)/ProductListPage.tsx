@@ -7,6 +7,7 @@ import Breadcrumbs from "../../components/common/Breadcrumbs.tsx";
 import { getProducts, type GetProductsParams } from "../../api/product.api.ts";
 import type { Product } from "../../types/product.ts";
 import ProductCard from "../../components/shop/ProductCard.tsx";
+import { FILTER_STYLES } from "../../types/productFilter.ts";
 
 function ProductListPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,9 +16,13 @@ function ProductListPage() {
   const [category, setCategory] = useState<Category | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
 
-  {
-    /* Category에 대한 요청 */
-  }
+  // 필터관련 state
+  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+
+  /* Category에 대한 요청 */
+
   useEffect(() => {
     const fetchInfo = async () => {
       if (!id) return;
@@ -45,6 +50,7 @@ function ProductListPage() {
           page: 1,
           limit: 40,
           categoryId: Number(id),
+          styles: selectedStyles,
         };
 
         const response = await getProducts(params);
@@ -56,7 +62,45 @@ function ProductListPage() {
       }
     };
     fetchProduct().then(() => {});
-  }, [id]);
+  }, [id, selectedStyles, selectedGenders, selectedSizes]);
+
+  const handleFilterChange = (type: "styles" | "genders" | "sizes", value: string) => {
+    switch (type) {
+      // array에 있는 includes 메소드 => 단순하게 이 안에 값이 포함되어져 있는지 확인할 때 쓰는 메소드
+      // array에 있는 find, some, 메소드는 array 안에 있는 요소가 객체일 때 사용.
+      // 왜냐하면 includes는 진짜 "값"만으로 찾아야 하고, find나 some메소드는 함수를 통해
+      // 그 요소들을 "꺼내서" 비교할 수 있기 때문
+      case "styles":
+        if (selectedStyles.includes(value)) {
+          // 빼야되는거고
+          setSelectedStyles(selectedStyles.filter((item) => item !== value));
+        } else {
+          // 덧붙여줘야 됨
+          setSelectedStyles([...selectedStyles, value]);
+        }
+        break;
+      case "genders":
+        if (selectedGenders.includes(value)) {
+          setSelectedGenders(selectedGenders.filter((item) => item !== value));
+        } else {
+          setSelectedGenders([...selectedGenders, value]);
+        }
+        break;
+      case "sizes":
+        if (selectedSizes.includes(value)) {
+          setSelectedSizes(selectedSizes.filter((item) => item !== value));
+        } else {
+          setSelectedSizes([...selectedSizes, value]);
+        }
+        break;
+    }
+  };
+
+  const handleReset = () => {
+      setSelectedStyles([]);
+      setSelectedGenders([]);
+      setSelectedSizes([]);
+  }
 
   return (
     <div className={twMerge(["max-w-400", "mx-auto", "py-40"])}>
@@ -82,7 +126,41 @@ function ProductListPage() {
       {/* 상품 목록 관련 */}
       <div className={twMerge(["flex"])}>
         {/* 상품 관련 필터 */}
-        <div className={twMerge(["w-64"])}>필터자리</div>
+        <div className={twMerge(["w-64"])}>
+          <aside className={twMerge(["w-64", "pr-8", "space-y-10", "h-fit"])}>
+            <div
+              className={twMerge(
+                ["flex", "justify-between", "items-center", "pb-4"],
+                ["border-b", "border-gray-800"],
+              )}
+            >
+              <h2 className={twMerge(["font-bold", "text-lg"])}>FILTER</h2>
+              <button className={twMerge(["text-xs", "text-gray-500"])} onClick={handleReset}>초기화</button>
+            </div>
+            {/* 필터 관련 */}
+            <div className={twMerge(["flex", "flex-col"])}>
+              {/*styles 시작*/}
+              <div className={twMerge(["space-y-4"])}>
+                <h3 className={twMerge(["font-bold", "text-sm"])}>종류</h3>
+                <div className={twMerge(["space-y-2", "pr-2"])}>
+                  {FILTER_STYLES.map((style, index) => (
+                    <label
+                      key={index}
+                      className={twMerge(["flex", "items-center", "gap-3", "cursor-pointer"])}
+                    >
+                      <input
+                        type={"checkbox"}
+                        className={twMerge(["w-4", "h-4", "rounded"])}
+                        onChange={() => handleFilterChange("styles", style.value)}
+                      />
+                      <span className={twMerge(["text-sm", "text-gray-600"])}>{style.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
 
         {/* 상품 목록 */}
         <div className={twMerge(["flex-1"])}>
