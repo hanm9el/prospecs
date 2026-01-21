@@ -3,7 +3,7 @@ import type { Category } from "./category.ts";
 export interface MetaResponse {
   total: number;
   page: number;
-  last_page: number;
+  lastPage: number;
 }
 
 export interface Product {
@@ -21,16 +21,16 @@ export interface Product {
   style: string;
 
   // 상품 고시 정보
-  material?: string; //  소재
+  material?: string; // 소재
   sizeInfo?: string; // 사이즈 정보
   manufacturer?: string; // 제조사
   originCountry?: string; // 제조국
   careInstructions?: string; // 세탁 주의사항
   manufactureDate?: string; // 제조년월
   qualityAssurance?: string; // 품질보증기준
-  asPhone?: string; // a/s 책임자 전화번호
+  asPhone?: string; // A/S 책임자 전화번호
 
-  // 카테고리정보
+  // 카테고리 정보
   categoryId: number;
   category: Category;
 
@@ -59,7 +59,7 @@ export interface ProductSize {
   stock: number;
 }
 
-// 목록 조회 응답 타임
+// 목록 조회 응답 타입
 export interface ProductListResponse {
   meta: MetaResponse;
   data: Product[];
