@@ -5,10 +5,15 @@ import { getProduct } from "../../api/product.api.ts";
 import { twMerge } from "tailwind-merge";
 import Button from "../../components/common/Button.tsx";
 import Accordion from "../../components/common/Accordion.tsx";
+import useCartStore from "../../store/useCartStore.ts";
+import useAuthStore from "../../store/useAuthStore.ts";
+
 
 function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addItem } = useCartStore();
+  const { isLoggedIn } = useAuthStore();
 
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
@@ -57,6 +62,46 @@ function ProductDetailPage() {
   // 화면에다 출력해줄 정보는 color에 종속되어 있고, color가 굉장히 많은 정보를 갖고 있음
   const currentColor = product.colors.find((color) => color.id === selectedColorId);
 
+  const handleAddToCart = async () => {
+    if (!isLoggedIn) {
+      const confirmLogin = window.confirm(
+        "로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?",
+      );
+      if (!confirmLogin) {
+        navigate("/login");
+      }
+      return;
+    }
+
+    if (!selectedSize || !currentColor) {
+      alert("사이즈를 선택해주세요.");
+      return;
+    }
+
+    // 우리가 addCart에 전달해야 되는 정보는 sizeId 와 quantity
+    // selectedSize는 "230" 이라는 값을 갖고 있는 state
+    const targetSizeObj = currentColor.sizes.find((size) => size.size === selectedSize);
+    if (!targetSizeObj) {
+      alert("유효하지 않은 사이즈입니다.");
+      return;
+    }
+
+    if (targetSizeObj.stock <= 0) {
+      alert("품절된 상품입니다.");
+      return;
+    }
+
+    try {
+      await addItem(targetSizeObj.id, quantity);
+      if (window.confirm("장바구니에 상품을 담았습니다. 장바구니로 이동하시겠습니까?")) {
+        navigate("/cart");
+      }
+    } catch (e) {
+      console.log(e);
+      alert("장바구니 담기에 실패했습니다.");
+    }
+  };
+
   return (
     <div className={twMerge(["w-full", "max-w-350", "mx-auto", "py-40"])}>
       {/* 상단 상품 정보 */}
@@ -82,10 +127,10 @@ function ProductDetailPage() {
 
         {/* 오른쪽 (상품 정보) */}
         <div className={twMerge(["w-1/3", "space-y-6"])}>
-          {/*상품 대표 정보*/}
+          {/* 상품 대표 정보 */}
           <RightHeaderBox product={product} currentColor={currentColor} />
 
-          {/*옵션 선택 영역*/}
+          {/* 옵션 선택 영역 */}
           <RightColorSelectBox
             product={product}
             currentColor={currentColor}
@@ -94,11 +139,13 @@ function ProductDetailPage() {
             setMainImage={setMainImage}
             setSelectedSize={setSelectedSize}
           />
+
           <RightSizeSelectBox
             currentColor={currentColor}
             selectedSize={selectedSize}
             setSelectedSize={setSelectedSize}
           />
+
           <RightQuantitySelectBox
             price={product.price}
             quantity={quantity}
@@ -107,7 +154,7 @@ function ProductDetailPage() {
 
           <div className={twMerge(["flex", "flex-col", "gap-3"])}>
             <Button size={"lg"}>바로구매</Button>
-            <Button size={"lg"} variant={"secondary"}>
+            <Button size={"lg"} variant={"secondary"} onClick={handleAddToCart}>
               장바구니
             </Button>
           </div>
@@ -207,7 +254,7 @@ interface RightHeaderBoxProps {
 function RightHeaderBox({ product, currentColor }: RightHeaderBoxProps) {
   return (
     <div className={twMerge(["border-b", "border-gray-200", "pb-6"])}>
-      <h1 className={twMerge(["text-3xl", " font-bold"])}>{product.name}</h1>
+      <h1 className={twMerge(["text-3xl", "font-bold"])}>{product.name}</h1>
       <div className={twMerge(["text-xs", "text-gray-500"])}>{currentColor?.productCode}</div>
       <div className={twMerge(["mt-6"])}>
         <span className={twMerge(["text-2xl", "font-bold", "text-gray-900"])}>
@@ -267,7 +314,7 @@ function RightColorSelectBox({
                   className={twMerge(["w-full", "h-full", "object-cover"])}
                 />
               ) : (
-                <div className={twMerge(["w-full", "h-full", "bg-gray-50"])}>No Image</div>
+                <div className={twMerge("w-full", "h-full", "bg-gray-50")}>No Image</div>
               )}
             </button>
           );
@@ -289,8 +336,8 @@ function RightSizeSelectBox({
   setSelectedSize,
 }: RightSizeSelectBoxProps) {
   return (
-    <div className={twMerge("w-full")}>
-      <div className={twMerge("text-sm", "font-bold", "mb-3")}>사이즈</div>
+    <div className={twMerge(["w-full"])}>
+      <div className={twMerge(["text-sm", "font-bold", "mb-3"])}>사이즈</div>
       <div className={twMerge(["flex", "flex-wrap", "gap-2"])}>
         {currentColor?.sizes.map((size, index) => {
           const isSoldOut = size.stock <= 0;
@@ -386,7 +433,7 @@ function RightInformationBox({ product }: RightInformationBoxProps) {
   return (
     <table className={twMerge(["w-full", "text-xs", "text-left"])}>
       <colgroup>
-        <col className={twMerge(["w-40"])} />
+        <col className={"w-40"} />
         <col />
       </colgroup>
       <tbody>
